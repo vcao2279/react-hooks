@@ -1,8 +1,8 @@
 import * as React from 'react'
 import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import App from '../final/02'
-// import App from '../exercise/02'
+// import App from '../final/02'
+import App from '../exercise/02'
 
 afterEach(() => {
   window.localStorage.removeItem('name')
@@ -11,7 +11,7 @@ afterEach(() => {
 test('App works', () => {
   const {rerender} = render(<App />)
   const inputTextbox = screen.getByRole('textbox', {name: /name/i})
-  
+
   userEvent.clear(inputTextbox)
   userEvent.type(inputTextbox, 'bob')
   const lsName = window.localStorage.getItem('name')
