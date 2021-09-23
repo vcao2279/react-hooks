@@ -10,19 +10,21 @@ const useLocalStorageState = (
   defaultValue = '',
   {serialize = JSON.stringify, deserialize = JSON.parse} = {},
 ) => {
-  const getLocalValue = () => {
-    const localValue = window.localStorage.getItem(key)
-    if (localValue) {
+  const [state, setState] = React.useState(() => {
+    const valueInLocalStorage = window.localStorage.getItem(key)
+    if (valueInLocalStorage) {
       try {
-        return deserialize(localValue)
+        return deserialize(valueInLocalStorage)
       } catch (error) {
         window.localStorage.removeItem(key)
       }
     }
 
-    return typeof defaultValue === 'function' ? defaultValue() : defaultValue
-  }
-  const [state, setState] = React.useState(getLocalValue)
+    if (defaultValue) {
+      return typeof defaultValue === 'function' ? defaultValue() : defaultValue
+    }
+  })
+
   const prevKeyRef = React.useRef(key)
 
   React.useEffect(() => {
@@ -39,8 +41,36 @@ const useLocalStorageState = (
 }
 
 function Greeting({initialName = ''}) {
+  // custom serialize/deserialize functions
+  const serialize = name => {
+    if (name) {
+      const nameArr = name.split(' ')
+      const firstName = nameArr.shift()
+      const lastName = nameArr.pop()
+      const middleName = nameArr.length ? nameArr.join(' ') : ''
+
+      return JSON.stringify({
+        firstName,
+        lastName,
+        middleName,
+      })
+    }
+
+    return name
+  }
+
+  const deserialize = name => {
+    // const {firstName, lastName} = JSON.parse(name)
+    // return `${firstName} ${lastName}`
+    const {firstName, middleName, lastName} = JSON.parse(name)
+    return `${firstName} ${middleName} ${lastName}`
+  }
+
   // use custom hook
-  const [name, setName] = useLocalStorageState('name', initialName)
+  const [name, setName] = useLocalStorageState('name', initialName, {
+    serialize,
+    deserialize,
+  })
 
   function handleChange(event) {
     setName(event.target.value)
